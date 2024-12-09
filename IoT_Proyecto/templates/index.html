@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Gráfica de Sensores</title>
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <script type="text/javascript">
+        google.charts.load('current', { packages: ['corechart'] });
+        google.charts.setOnLoadCallback(drawChart);
+
+        async function fetchData() {
+            const response = await fetch('/api/datos');
+            return await response.json();
+        }
+
+        async function drawChart() {
+            const data = await fetchData();
+
+            // Crear estructura para Google Charts
+            const chartData = [['Timestamp', 'Temperatura (°C)', 'Humedad (%)']];
+            data.forEach(entry => {
+                chartData.push([new Date(entry.timestamp), entry.temperatura, entry.humedad]);
+            });
+
+            const dataTable = google.visualization.arrayToDataTable(chartData);
+
+            const options = {
+                title: 'Temperatura y Humedad',
+                hAxis: { title: 'Tiempo', format: 'HH:mm:ss', gridlines: { count: 10 } },
+                vAxes: {
+                    0: { title: 'Temperatura (°C)' },
+                    1: { title: 'Humedad (%)' }
+                },
+                series: {
+                    0: { targetAxisIndex: 0 },
+                    1: { targetAxisIndex: 1 }
+                },
+                legend: { position: 'bottom' }
+            };
+
+            const chart = new google.visualization.LineChart(document.getElementById('chart_div'));
+            chart.draw(dataTable, options);
+        }
+    </script>
+</head>
+<body>
+    <h1>Gráfica de Sensores</h1>
+    <div id="chart_div" style="width: 100%; height: 500px;"></div>
+</body>
+</html>
+
